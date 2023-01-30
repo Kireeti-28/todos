@@ -11,6 +11,9 @@ cursor = conn.cursor()
 
 console = Console()
 
+def drop_table():
+  cursor.execute("drop table if exists todos")
+
 def create_table():
   cursor.execute("""
     create table if not exists todos (
@@ -23,6 +26,10 @@ def create_table():
   )
 
 create_table()
+
+def alter():
+  with conn:
+    cursor.execute("alter todos add deleted_flag text")
 
 def pretty_error(er):
   print('SQLite error: %s' % (' '.join(er.args)))
@@ -77,6 +84,7 @@ def get_by_id(id) -> Todo:
     
 
 def get_all() -> List[Todo]:
+  # alter()
   try:
     cursor.execute("select * from todos")
     results = cursor.fetchall()

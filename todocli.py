@@ -3,36 +3,40 @@ from datetime import datetime
 from rich.console import Console
 from rich.table import Table
 from model import Todo
-from database import get_all, get_by_id, update_task, insert_task, delete
+from database import get_all, update_task, insert_task, delete, drop_table
 
 console = Console()
 
-console_info = Console(width=10)
+console_info = Console(width=12)
 
 app = typer.Typer()
 
 @app.command()
 def add(task: str, priority: str):
-  console.print("Adding...", "white on green")
+  console.print("ADDING...\n\n\n", style="bold green")
   todo = Todo(task, priority, datetime.now().isoformat(), None, None)
   insert_task(todo)
   console.print("Added!!", "white on green")
   show_all()
 
-@app.command()
-def delete_id(id: int):
-  console.print("DELETING...", style="bold green")
-  delete(id)
-  show_all()
+# @app.command()
+# def delete_id(id: int):
+#   console.print("DELETING...\n\n\n", style="bold green")
+#   delete(id)
+#   show_all()
 
 @app.command()
 def update():
-  print("make sure you enter exact field  name")
-  field = input("Enter field you want to update (name, priority, active_flag): ")
+  console.print("Make sure you enter exact field  name", style="bold purple")
+  console.print("Enter field you want to update (name, priority, active_flag): \t\t", style="bold green")
+  field = input()
   if field not in  ['name', 'priority', 'active_flag']:
-    console.print()
+    console.print("OOPS, incorrect filed.")
     return
-  field_value  = input("Enter field value: ")
+      
+  console.print("Enter field value: \t\t", style="bold green")
+
+  field_value  = input()
   id = int(input('Enter Id: '))
   typer.echo(f'Updating id #{id}')
   update_task(id, field, field_value)
@@ -42,6 +46,10 @@ def update():
 # def complete(position: int):
 #   typer.echo(f'Complete {position}')
 #   show_all()
+
+@app.command()
+def drop():
+  drop_table()
 
 @app.command()
 def show_all():
@@ -60,8 +68,12 @@ def show_all():
   if tasks:
     for idx, task in enumerate(tasks, start=1):
       c = get_category_color(task.priority)
-      is_done_str = '❌' if task.active_flag == 'Y' else '✅'
-      table.add_row(str(idx), task.task_name, f'[{c}]{task.priority}[/{c}]', is_done_str, task.created_date, task.last_updated )
+      is_done_str = '✅' if task.active_flag == 'Y' else '❌'
+      if is_done_str == '❌':
+        table.add_row(str(idx), task.task_name, f'[{c}]{task.priority}[/{c}]', is_done_str, task.created_date, task.last_updated, style='black')
+      else:
+        table.add_row(str(idx), task.task_name, f'[{c}]{task.priority}[/{c}]', is_done_str, task.created_date, task.last_updated, style='white')
+
   console.print(table)
 
 # @app.command()
